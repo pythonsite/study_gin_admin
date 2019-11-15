@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+
 	"github.com/BurntSushi/toml"
 )
 
@@ -9,7 +10,7 @@ var (
 	global *Config
 )
 
-//LoadGlobal 加载全局配置
+// LoadGlobal 加载全局配置
 func LoadGlobal(fpath string) error {
 	c, err := Parse(fpath)
 	if err != nil {
@@ -28,7 +29,7 @@ func Global() *Config {
 }
 
 // Parse 解析配置文件
-func Parse(fpath string) (*Config,error) {
+func Parse(fpath string) (*Config, error) {
 	var c Config
 	_, err := toml.DecodeFile(fpath, &c)
 	if err != nil {
@@ -37,52 +38,72 @@ func Parse(fpath string) (*Config,error) {
 	return &c, nil
 }
 
+// Config 配置参数
 type Config struct {
-	RunMode 			string `toml:"run_mode"`
-	CasbinModelConf 	string `toml:"casbin_model"`
-	WWW 				string `toml:"www"`
-	Swagger 			string `toml:"swagger"`
-	Store 				string `toml:"store"`
-	AllowInitMenu 		bool `toml:"allow_init_menu"`
-	EnableCasbin 		bool `toml:"enable_casbin"`
-	Log 				Log `toml:"log"`
-	LogGormHook     	LogGormHook `toml:"log_gorm_hook"`
-	Root            	Root        `toml:"root"`
-	JWTAuth         	JWTAuth     `toml:"jwt_auth"`
-	HTTP            	HTTP        `toml:"http"`
-	Monitor         	Monitor     `toml:"monitor"`
-	Captcha         	Captcha     `toml:"captcha"`
-	RateLimiter     	RateLimiter `toml:"rate_limiter"`
-	CORS            	CORS        `toml:"cors"`
-	Redis           	Redis       `toml:"redis"`
-	Gorm           	 	Gorm        `toml:"gorm"`
-	MySQL           	MySQL       `toml:"mysql"`
-	Postgres        	Postgres    `toml:"postgres"`
-	Sqlite3         	Sqlite3     `toml:"sqlite3"`
+	RunMode     string      `toml:"run_mode"`
+	WWW         string      `toml:"www"`
+	Swagger     string      `toml:"swagger"`
+	Store       string      `toml:"store"`
+	HTTP        HTTP        `toml:"http"`
+	Menu        Menu        `toml:"menu"`
+	Casbin      Casbin      `toml:"casbin"`
+	Log         Log         `toml:"log"`
+	LogGormHook LogGormHook `toml:"log_gorm_hook"`
+	Root        Root        `toml:"root"`
+	JWTAuth     JWTAuth     `toml:"jwt_auth"`
+	Monitor     Monitor     `toml:"monitor"`
+	Captcha     Captcha     `toml:"captcha"`
+	RateLimiter RateLimiter `toml:"rate_limiter"`
+	CORS        CORS        `toml:"cors"`
+	Redis       Redis       `toml:"redis"`
+	Gorm        Gorm        `toml:"gorm"`
+	MySQL       MySQL       `toml:"mysql"`
+	Postgres    Postgres    `toml:"postgres"`
+	Sqlite3     Sqlite3     `toml:"sqlite3"`
+}
+
+// IsDebugMode 是否是debug模式
+func (c *Config) IsDebugMode() bool {
+	return c.RunMode == "debug"
+}
+
+// Menu 菜单配置参数
+type Menu struct {
+	Enable bool   `toml:"enable"`
+	Data   string `toml:"data"`
+}
+
+// Casbin casbin配置参数
+type Casbin struct {
+	Enable           bool   `toml:"enable"`
+	Debug            bool   `toml:"debug"`
+	Model            string `toml:"model"`
+	AutoLoad         bool   `toml:"auto_load"`
+	AutoLoadInternal int    `toml:"auto_load_internal"`
 }
 
 // Log 日志配置参数
 type Log struct {
-	Level 			int `toml:"level"`
-	Format 			string `toml:"format"`
-	Output 			string `toml:"output"`
-	OutputFile 		string `toml:"output_file"`
-	EnableHook 		bool   `toml:"enable_hook"`
-	Hook 			string `hook`
-	HookMaxThread 	int 	`hook_max_thread`
-	HookMaxBuffer 	int	`hook_max_buffer`
+	Level         int    `toml:"level"`
+	Format        string `toml:"format"`
+	Output        string `toml:"output"`
+	OutputFile    string `toml:"output_file"`
+	EnableHook    bool   `toml:"enable_hook"`
+	Hook          string `toml:"hook"`
+	HookMaxThread int    `toml:"hook_max_thread"`
+	HookMaxBuffer int    `toml:"hook_max_buffer"`
 }
 
 // LogGormHook 日志gorm钩子配置
 type LogGormHook struct {
-	DBType  		string `toml:"db_type"`
-	MaxLifetime		string `toml:"max_lifetime"`
-	MaxOpenConns 	int 	`toml:"max_open_conns"`
-	MaxIdleConns 	int 	`toml:"max_idle_conns"`
-	Table 			string `toml:"table"`
+	DBType       string `toml:"db_type"`
+	MaxLifetime  int    `toml:"max_lifetime"`
+	MaxOpenConns int    `toml:"max_open_conns"`
+	MaxIdleConns int    `toml:"max_idle_conns"`
+	Table        string `toml:"table"`
 }
 
-// Root root 用户
+// Root root用户
 type Root struct {
 	UserName string `toml:"user_name"`
 	Password string `toml:"password"`
@@ -174,7 +195,6 @@ func (a MySQL) DSN() string {
 		a.User, a.Password, a.Host, a.Port, a.DBName, a.Parameters)
 }
 
-
 // Postgres postgres配置参数
 type Postgres struct {
 	Host     string `toml:"host"`
@@ -200,4 +220,3 @@ type Sqlite3 struct {
 func (a Sqlite3) DSN() string {
 	return a.Path
 }
-

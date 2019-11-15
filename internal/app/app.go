@@ -2,7 +2,9 @@ package app
 
 import (
 	"context"
+	"os"
 	"study_gin_admin/internal/app/config"
+	"study_gin_admin/pkg/logger"
 )
 
 type options struct {
@@ -10,6 +12,7 @@ type options struct {
 	ModelFile 	string
 	WWWDir 		string
 	SwaggerDir 	string
+	MenuFile   string
 	Version 	string
 }
 
@@ -66,6 +69,26 @@ func Init(ctx context.Context, opts ...Option) func() {
 	handleError(err)
 
 	cfg := config.Global()
+	logger.Printf(ctx, "服务启动，运行模式：%s 版本号：%s 进程号：%d", cfg.RunMode,o.Version, os.Getpid())
+
+	if v := o.ModelFile; v != "" {
+		cfg.Casbin.Model = v
+	}
+	if v := o.WWWDir;v != "" {
+		cfg.WWW = v
+	}
+	if v := o.SwaggerDir; v != "" {
+		cfg.Swagger = v
+	}
+	if v:= o.MenuFile; v!= "" {
+		cfg.Menu.Data = v
+	}
+	loggerCall, err := InitLogger()
+	if err != nil {
+		logger.Errorf(ctx, err.Error())
+	}
+
+
 }
 
 
