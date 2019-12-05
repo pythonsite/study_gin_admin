@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"go.uber.org/dig"
 	"os"
 	"study_gin_admin/internal/app/config"
 	"study_gin_admin/pkg/logger"
@@ -47,6 +48,13 @@ func SetSwaggerDir(s string) Option {
 	}
 }
 
+// SetMenuFile 设定菜单数据文件
+func SetMenuFile(s string) Option {
+	return func(o *options) {
+		o.MenuFile = s
+	}
+}
+
 // SetVersion 设定版本号
 func SetVersion(s string) Option {
 	return func(o *options) {
@@ -60,6 +68,7 @@ func handleError(err error) {
 	}
 }
 
+// Init 应用初始化
 func Init(ctx context.Context, opts ...Option) func() {
 	var o options
 	for _, opt := range opts {
@@ -88,7 +97,23 @@ func Init(ctx context.Context, opts ...Option) func() {
 		logger.Errorf(ctx, err.Error())
 	}
 
+	err = InitMonitor()
+	if err != nil {
+		logger.Errorf(ctx,err.Error())
+	}
 
+	// 初始化图形验证码
+	InitCaptcha()
+
+
+}
+
+func BuildContainer() (*dig.Container,func()){
+	container := dig.New()
+
+	return container, func() {
+
+	}
 }
 
 
